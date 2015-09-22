@@ -1,5 +1,7 @@
 package com.company;
 
+import java.security.InvalidAlgorithmParameterException;
+
 /**
  * Outline: Conway Game Of Life
  *
@@ -12,178 +14,188 @@ package com.company;
  *      2.1 If the cell is dead and have exactly 3 live cells neighbours becomes a live cell
  *      2.2 If the cell is live cell
  *          (1) If live cell with fewer than two live neighbours dies
- *          (2) If live cell with two or three live neighbours lives on to the next generation.
+ *          (2) If live cell with more than three live neighbours dies, as if by overcrowding.
  *      2.3 Otherwise, keep the current state of the cell (nothing change)
  *      2.4 Print out the current state of the system to console.
  *
  */
 public class Main {
 
-    public static void main(String[] args) throws InterruptedException {
-        // initialize state (1: live, 0: dead)
-        int cur_gen[][] = {
-                {0, 0, 0, 0, 0, 0, 0, 0},
-                {0, 0, 1, 0, 0, 0, 0, 0},
-                {0, 0, 1, 0, 0, 0, 0, 0},
-                {0, 0, 1, 0, 0, 0, 0, 0},
-                {0, 0, 1, 0, 1, 1, 1, 0},
-                {0, 0, 1, 1, 0, 0, 1, 0},
-                {0, 0, 1, 0, 0, 0, 1, 0},
-                {0, 0, 0, 0, 0, 0, 0, 0}
+    /**
+     *
+     * @param args
+     * @throws InterruptedException
+     * @throws InvalidAlgorithmParameterException
+     */
+    public static void main(String[] args)
+            throws InterruptedException, InvalidAlgorithmParameterException {
+
+        // Blinker (period 2)
+        byte blinkerSeed[][] = {
+                {0, 0, 0, 0, 0},
+                {0, 0, 1, 0, 0},
+                {0, 0, 1, 0, 0},
+                {0, 0, 1, 0, 0},
+                {0, 0, 0, 0, 0}
         };
 
-        int next_gen[][] = new int[8][8];
+        // Beacon (period 2)
+        byte beaconSeed[][] = {
+                {0, 0, 0, 0, 0, 0},
+                {0, 1, 1, 0, 0, 0},
+                {0, 1, 1, 0, 0, 0},
+                {0, 0, 0, 1, 1, 0},
+                {0, 0, 0, 1, 1, 0},
+                {0, 0, 0, 0, 0, 0}
+        };
 
-        // 1. Copy the current generation to next generation
-        copy2DimIntArray(cur_gen, next_gen);
+        // Initialize the Game Of Life with a given seed
+        GameOfLife life = new GameOfLife(beaconSeed);
 
-        int g = 0;
-
-        // infinite loop to demo the life will go on forever.
         while (true) {
-            // generation step
-            g++;
+            // Print out the current state of the system
+            System.out.println(life.toString());
 
-            // print out the current state of the system.
-            System.out.println();
-            System.out.println("#### gen " + g + " ####");
-            printArray(next_gen);
+            // Transition to the next generation by applying the rule
+            life.nextGeneration();
 
-            // 2. At each time, looping all cells in the current generation.
-            for (int i = 0; i < cur_gen.length; i++) {
-                for (int j = 0; j < cur_gen.length; j++) {
+            // do nothing but delay program some seconds to see the result of each step time.
+            Thread.sleep(1000);
+        }
 
-                    // 2.1 If the cell is dead and have exactly 3 live cells neighbours becomes a live cell
-                    if (cur_gen[i][j] == 0) {
-                        if (countLiveCell(cur_gen, i, j) == 3) {
-                            next_gen[i][j] = 1;
-                        }
-                    } else { // 2.2 If the cell is live cell
-                        // (1) If live cell with fewer than two live neighbours dies
-                        if (countLiveCell(cur_gen, i, j) < 2) {
-                            next_gen[i][j] = 0;
-                        // (2) If live cell with two or three live neighbours lives on to the next generation.
-                        } else if (countLiveCell(cur_gen, i, j) > 3) {
-                            next_gen[i][j] = 0;
-                        }
+    }
+}
+
+/**
+ *
+ */
+class GameOfLife {
+    // Store the state of the current generation
+    private byte currentGeneration[][];
+
+    private int horizontal;
+
+    private int vertical;
+
+    /**
+     *
+     * @param seedOfTheSystem   seed of the system
+     * @throws InvalidAlgorithmParameterException throw <code>InvalidAlgorithmParameterException</code> if the input
+     * null value for <code>seedOfTheSystem</code>
+     */
+    public GameOfLife(byte[][] seedOfTheSystem) throws InvalidAlgorithmParameterException {
+        if (seedOfTheSystem == null) {
+            throw new InvalidAlgorithmParameterException();
+        }
+        currentGeneration = seedOfTheSystem;
+        vertical = currentGeneration.length;
+        if (vertical < 1) {
+            throw new InvalidAlgorithmParameterException();
+        }
+
+        horizontal = currentGeneration[0].length;
+        if (horizontal < 1) {
+            throw new InvalidAlgorithmParameterException();
+        }
+
+    }
+
+    /**
+     *
+     */
+    public void nextGeneration() {
+        byte[][] boundary = makeBoundaryGrid();
+        byte[][] nextGeneration = new byte[vertical][horizontal];
+
+        for (int i = 0; i < vertical; i++) {
+            System.arraycopy(currentGeneration[i], 0, nextGeneration[i], 0, horizontal);
+        }
+
+        // At each step time, looping all cells in the current generation to apply the rules
+        for (int i = 0; i < vertical; i++) {
+            for (int j = 0; j < horizontal; j++) {
+                byte liveCellNeighbours = countLiveNeighbourCells(boundary, i, j);
+                // If the cell is dead and have exactly 3 live cells neighbours becomes a live cell
+                if (currentGeneration[i][j] == 0) {
+                    if (liveCellNeighbours == 3) {
+                        nextGeneration[i][j] = 1;
                     }
-                    // 2.3 Otherwise, keep the current state of the cell (nothing change)
+                } else { // If the cell is live cell
+                    // If live cell with fewer than two live neighbours dies
+                    // If live cell with more than three live neighbours dies, as if by overcrowding.
+                    if (liveCellNeighbours < 2 || liveCellNeighbours > 3) {
+                        nextGeneration[i][j] = 0;
+                    }
+                    // Otherwise, keep the current state of the cell (nothing change)
                 }
             }
-
-            // store the next generation to the current generation to move to next step.
-            copy2DimIntArray(next_gen, cur_gen);
-
-            // do nothing but delay program some seconds to see the result of each time.
-            Thread.sleep(1000);
-
-
         }
 
-    }
-
-    /**
-     * using system array copy to copy 2 dimension arrays
-     *
-     * @param src the source array.
-     * @param dest the destination array.
-     */
-    public static void copy2DimIntArray(int[][] src, int[][] dest) {
-        int dim_1 = src.length;
-
-        int dim_2 = src[0].length;
-
-        for (int i = 0; i < dim_1; i++) {
-            System.arraycopy(src[i], 0, dest[i], 0, dim_2);
+        // Store the next generation to the current generation
+        for (int i = 0; i < vertical; i++) {
+            System.arraycopy(nextGeneration[i], 0, currentGeneration[i], 0, horizontal);
         }
     }
 
     /**
-     * Extract 3x3 array that around the given cell position.
-     * This will be used to count live cell among 8 neighbours of the given position cell.
      *
-     * @param src 2-dim array that contain the universe of the Game Of Life
-     * @param dest 2-dim 3x3 array that contains the 8 neighbours and the current cell.
-     * @param x the x position of the given cell
-     * @param y the y position of the given cell
+     * @return
      */
-    public static void copy3x3IntArray(int[][] src, int[][] dest, int x, int y) {
-        int src_out_bound[][] = new int[10][10];
+    private byte[][] makeBoundaryGrid() {
 
-        // trick: create a bound array to count the neighbours cell more easy for boundary cells.
-        for (int i = 0; i < src_out_bound.length; i++) {
-            for (int j = 0; j < src_out_bound[i].length; j++) {
-                src_out_bound[i][j] = 0;
-            }
+        byte[][] boundary = new byte[vertical + 2][horizontal + 2];
+
+        // copy the current state to the boundary array.
+        for (int i = 1; i <= vertical; i++) {
+            System.arraycopy(currentGeneration[i - 1], 0, boundary[i], 1, horizontal);
         }
 
-        // copy the current state to the bound array.
-        for (int i = 1; i < 8; i++) {
-            System.arraycopy(src[i - 1], 0, src_out_bound[i], 1, src[0].length);
-        }
+        return boundary;
+    }
+
+    /**
+     *
+     * @param boundary
+     * @param x
+     * @param y
+     * @return
+     */
+    private byte countLiveNeighbourCells(byte[][] boundary, int x, int y) {
+        byte neighbours[][] = new byte[3][3];
 
         // extract 2-dim 3x3 array of the 8 neighbours for the given cell.
-        for (int i = 0; i < dest.length; i++) {
-            System.arraycopy(src_out_bound[x + i], y, dest[i], 0, dest.length);
+        for (int i = 0; i < 3; i++) {
+            System.arraycopy(boundary[x + i], y, neighbours[i], 0, 3);
         }
+        neighbours[1][1] = 0;
 
-    }
-
-    /**
-     * count all the live neighbours of a given position <code>x, y</code>.
-     * That count will be used to determine the next state of the given cell.
-     *
-     * @param arr 2-dim array that contain the universe of the Game Of Life
-     * @param x the x position of the given cell
-     * @param y the y position of the given cell
-     * @return return the total number of live neighbours of a given cell.
-     */
-    public static int countLiveCell(int[][] arr, int x, int y) {
-        int dest[][] = new int[3][3];
-        copy3x3IntArray(arr, dest, x, y);
-
-        // set the given cell to 0 to not count the center cell.
-        // only count the 8 neighbours
-        dest[1][1] = 0;
-
-        return count(dest);
-    }
-
-    /**
-     * Using sum to count all the live neighbours
-     *
-     * @param arr array of 3x3 that contains all the neighbours and the cell itself
-     * @return the total number of live neighbours of a cell.
-     */
-    public static int count(int[][] arr) {
-        int sum = 0;
-
-        for (int i = 0; i < arr.length; i++) {
-            for (int j = 0; j < arr[i].length; j++) {
-                sum += arr[i][j];
+        byte sum = 0;
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                sum += neighbours[i][j];
             }
         }
+
         return sum;
     }
 
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
 
-    /**
-     * Print out 2 dim array to see the current state of the system.
-     *
-     * @param arr the input 2-dim array that store the state of the universe of the Game of Life.
-     */
-    public static void printArray(int[][] arr) {
-        for (int i = 0; i < arr.length; i++) {
-            for (int j = 0; j < arr.length; j++) {
-                if (arr[i][j] == 1) {
-                    // printout the live cell by black square character, ◾
-                    System.out.print("◾");
+        for (int i = 0; i < vertical; i++) {
+            for (int j = 0; j < horizontal; j++) {
+                if (currentGeneration[i][j] == 1) {
+                    // present the live cell by black square character, ◾
+                    builder.append("◾");
                 } else {
-                    // print out the dead cell by white square character, ◽
-                    System.out.print("◽");
+                    // present out the dead cell by white square character, ◽
+                    builder.append("◽");
                 }
             }
-            System.out.println();
+            builder.append("\n");
         }
+
+        return builder.toString();
     }
 }
