@@ -18,16 +18,17 @@ import java.util.BitSet;
  *      2.3 Otherwise, keep the current state of the cell (nothing change)
  *      2.4 Print out the current state of the system to console.
  *
+ * @author  Dang Viet Ha (dvietha@gmail.com)
  */
 public class Main {
 
     /**
      * Running Game Of Life demo with some seed pattern.
+     *
      * @param args
      * @throws InterruptedException
      */
-    public static void main(String[] args)
-            throws InterruptedException {
+    public static void main(String[] args) throws InterruptedException {
 
         // Blinker (period 2)
         byte blinkerSeed[][] = {
@@ -78,6 +79,7 @@ class GameOfLife {
 
     /**
      * Initialize the current state of the system with a given seed
+     *
      * @param seedOfTheSystem   seed of the system
      * @throws UnsupportedOperationException throw <code>UnsupportedOperationException</code>
      *          if the input null value for <code>seedOfTheSystem</code>
@@ -101,12 +103,14 @@ class GameOfLife {
 
     /**
      * Transition to the next generation by applying the below rule
+     *
      * <ul>
      *   <li>Any live cell with fewer than two live neighbours dies, as if caused by under-population.</li>
      *   <li>Any live cell with two or three live neighbours lives on to the next generation.</li>
      *   <li>Any live cell with more than three live neighbours dies, as if by overcrowding.</li>
      *   <li>Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.</li>
      * </ul>
+     *
      */
     public void nextGeneration() {
         BitSet nextGeneration = new BitSet(vertical*horizontal);
@@ -137,9 +141,10 @@ class GameOfLife {
 
     /**
      * Count the live cell neighbours to given cell
-     * @param x the x position of the cell
-     * @param y the y position of the cell
-     * @return the total number of live cell neighbours to the given cell
+     *
+     * @param x The x position of the cell
+     * @param y The y position of the cell
+     * @return he total number of live cell neighbours to the given cell
      */
     private byte countLiveNeighbourCells(final int x, final int y) {
 
@@ -162,9 +167,10 @@ class GameOfLife {
 
     /**
      * Calculate the index of the <code>BitSet</code> vector from input grid cell
-     * @param x x position of the cell
-     * @param y y position of the cell
-     * @return the index of the cell in the equivalent BitSet
+     *
+     * @param x The x position of the cell
+     * @param y The y position of the cell
+     * @return The index of the cell in the equivalent BitSet
      */
     private int getIndex(final int x, final int y) {
         return (x * horizontal) + y;
@@ -172,6 +178,7 @@ class GameOfLife {
 
     /**
      * Set the current state of the system from given seed.
+     *
      * @param seed  seed of the system
      */
     private void setCurrentGeneration(byte[][] seed) {
