@@ -1,6 +1,7 @@
 package com.company;
 
 import java.security.InvalidAlgorithmParameterException;
+import java.util.BitSet;
 
 /**
  * Outline: Conway Game Of Life
@@ -22,13 +23,12 @@ import java.security.InvalidAlgorithmParameterException;
 public class Main {
 
     /**
-     *
+     * Running Game Of Life demo with some seed pattern.
      * @param args
      * @throws InterruptedException
-     * @throws InvalidAlgorithmParameterException
      */
     public static void main(String[] args)
-            throws InterruptedException, InvalidAlgorithmParameterException {
+            throws InterruptedException {
 
         // Blinker (period 2)
         byte blinkerSeed[][] = {
@@ -69,33 +69,35 @@ public class Main {
  *
  */
 class GameOfLife {
+
     // Store the state of the current generation
-    private byte currentGeneration[][];
+    private BitSet currentGeneration;
 
     private int horizontal;
 
     private int vertical;
 
     /**
-     *
+     * Initialize the current state of the system with a given seed
      * @param seedOfTheSystem   seed of the system
-     * @throws InvalidAlgorithmParameterException throw <code>InvalidAlgorithmParameterException</code>
+     * @throws UnsupportedOperationException throw <code>UnsupportedOperationException</code>
      *          if the input null value for <code>seedOfTheSystem</code>
      */
-    public GameOfLife(byte[][] seedOfTheSystem) throws InvalidAlgorithmParameterException {
+    public GameOfLife(byte[][] seedOfTheSystem) {
         if (seedOfTheSystem == null) {
-            throw new InvalidAlgorithmParameterException();
+            throw new UnsupportedOperationException();
         }
-        currentGeneration = seedOfTheSystem;
-        vertical = currentGeneration.length;
+        vertical = seedOfTheSystem.length;
         if (vertical < 1) {
-            throw new InvalidAlgorithmParameterException();
+            throw new UnsupportedOperationException();
         }
 
-        horizontal = currentGeneration[0].length;
+        horizontal = seedOfTheSystem[0].length;
         if (horizontal < 1) {
-            throw new InvalidAlgorithmParameterException();
+            throw new UnsupportedOperationException();
         }
+        currentGeneration = new BitSet(vertical*horizontal);
+        setCurrentGeneration(seedOfTheSystem);
     }
 
     /**
@@ -108,24 +110,23 @@ class GameOfLife {
      * </ul>
      */
     public void nextGeneration() {
-        byte[][] nextGeneration = new byte[vertical][horizontal];
-
+        BitSet nextGeneration = new BitSet(vertical*horizontal);
         // At each step time, looping all cells in the current generation to apply the rules
         for (int i = 0; i < vertical; i++) {
             for (int j = 0; j < horizontal; j++) {
                 byte liveCellNeighbours = countLiveNeighbourCells(i, j);
                 // If the cell is dead and have exactly 3 live cells neighbours becomes a live cell
-                if (currentGeneration[i][j] == 0) {
+                if (!currentGeneration.get(getIndex(i, j))) {
                     if (liveCellNeighbours == 3) {
-                        nextGeneration[i][j] = 1;
+                        nextGeneration.set(getIndex(i, j));
                     }
                 } else { // If the cell is live cell
                     // If live cell with fewer than two live neighbours dies
                     // If live cell with more than three live neighbours dies, as if by overcrowding.
                     if (liveCellNeighbours < 2 || liveCellNeighbours > 3) {
-                        nextGeneration[i][j] = 0;
+                        nextGeneration.clear(getIndex(i, j));
                     } else { // Otherwise, keep the current state of the cell
-                        nextGeneration[i][j] = currentGeneration[i][j];
+                        nextGeneration.set(getIndex(i, j), currentGeneration.get(getIndex(i, j)));
                     }
                 }
             }
@@ -136,10 +137,10 @@ class GameOfLife {
     }
 
     /**
-     *
-     * @param x
-     * @param y
-     * @return
+     * Count the live cell neighbours to given cell
+     * @param x the x position of the cell
+     * @param y the y position of the cell
+     * @return the total number of live cell neighbours to the given cell
      */
     private byte countLiveNeighbourCells(final int x, final int y) {
 
@@ -148,14 +149,41 @@ class GameOfLife {
         int minY = y <= 0 ? 0 : y - 1;
         int maxY = y >= horizontal - 1 ? horizontal - 1: y + 1;
 
-        byte sum = 0;
+        byte count = 0;
         for (int i = minX; i <= maxX; i++) {
             for (int j = minY; j <= maxY; j++) {
-                sum += currentGeneration[i][j];
+                if (currentGeneration.get(getIndex(i, j))) {
+                    count++;
+                }
             }
         }
-        sum -= currentGeneration[x][y];
-        return sum;
+        if (currentGeneration.get(getIndex(x, y))) count--;
+        return count;
+    }
+
+    /**
+     * Calculate the index of the <code>BitSet</code> vector from input grid cell
+     * @param x x position of the cell
+     * @param y y position of the cell
+     * @return the index of the cell in the equivalent BitSet
+     */
+    private int getIndex(final int x, final int y) {
+        return (x * horizontal) + y;
+    }
+
+    /**
+     * Set the current state of the system from given seed.
+     * @param seed  seed of the system
+     */
+    private void setCurrentGeneration(byte[][] seed) {
+        for (int i = 0; i < vertical; i++) {
+            for (int j = 0; j < horizontal; j++) {
+                if (seed[i][j] == 1)
+                    currentGeneration.set(getIndex(i, j), true);
+                else
+                    currentGeneration.set(getIndex(i, j), false);
+            }
+        }
     }
 
     @Override
@@ -164,7 +192,7 @@ class GameOfLife {
 
         for (int i = 0; i < vertical; i++) {
             for (int j = 0; j < horizontal; j++) {
-                if (currentGeneration[i][j] == 1) {
+                if (currentGeneration.get(getIndex(i, j))) {
                     // Present the live cell by black square character
                     builder.append("◾");
                 } else {
