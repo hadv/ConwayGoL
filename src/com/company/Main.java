@@ -1,6 +1,5 @@
 package com.company;
 
-import java.security.InvalidAlgorithmParameterException;
 import java.util.BitSet;
 
 /**
