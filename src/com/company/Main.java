@@ -59,10 +59,9 @@ public class Main {
             // Transition to the next generation by applying the rule
             life.nextGeneration();
 
-            // do nothing but delay program some seconds to see the result of each step time.
+            // Do nothing but delay program some seconds to see the result of each step time.
             Thread.sleep(1000);
         }
-
     }
 }
 
@@ -80,8 +79,8 @@ class GameOfLife {
     /**
      *
      * @param seedOfTheSystem   seed of the system
-     * @throws InvalidAlgorithmParameterException throw <code>InvalidAlgorithmParameterException</code> if the input
-     * null value for <code>seedOfTheSystem</code>
+     * @throws InvalidAlgorithmParameterException throw <code>InvalidAlgorithmParameterException</code>
+     *          if the input null value for <code>seedOfTheSystem</code>
      */
     public GameOfLife(byte[][] seedOfTheSystem) throws InvalidAlgorithmParameterException {
         if (seedOfTheSystem == null) {
@@ -97,24 +96,24 @@ class GameOfLife {
         if (horizontal < 1) {
             throw new InvalidAlgorithmParameterException();
         }
-
     }
 
     /**
-     *
+     * Transition to the next generation by applying the below rule
+     * <ul>
+     *   <li>Any live cell with fewer than two live neighbours dies, as if caused by under-population.</li>
+     *   <li>Any live cell with two or three live neighbours lives on to the next generation.</li>
+     *   <li>Any live cell with more than three live neighbours dies, as if by overcrowding.</li>
+     *   <li>Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.</li>
+     * </ul>
      */
     public void nextGeneration() {
-        byte[][] boundary = makeBoundaryGrid();
         byte[][] nextGeneration = new byte[vertical][horizontal];
-
-        for (int i = 0; i < vertical; i++) {
-            System.arraycopy(currentGeneration[i], 0, nextGeneration[i], 0, horizontal);
-        }
 
         // At each step time, looping all cells in the current generation to apply the rules
         for (int i = 0; i < vertical; i++) {
             for (int j = 0; j < horizontal; j++) {
-                byte liveCellNeighbours = countLiveNeighbourCells(boundary, i, j);
+                byte liveCellNeighbours = countLiveNeighbourCells(i, j);
                 // If the cell is dead and have exactly 3 live cells neighbours becomes a live cell
                 if (currentGeneration[i][j] == 0) {
                     if (liveCellNeighbours == 3) {
@@ -125,57 +124,37 @@ class GameOfLife {
                     // If live cell with more than three live neighbours dies, as if by overcrowding.
                     if (liveCellNeighbours < 2 || liveCellNeighbours > 3) {
                         nextGeneration[i][j] = 0;
+                    } else { // Otherwise, keep the current state of the cell
+                        nextGeneration[i][j] = currentGeneration[i][j];
                     }
-                    // Otherwise, keep the current state of the cell (nothing change)
                 }
             }
         }
 
         // Store the next generation to the current generation
-        for (int i = 0; i < vertical; i++) {
-            System.arraycopy(nextGeneration[i], 0, currentGeneration[i], 0, horizontal);
-        }
+        currentGeneration = nextGeneration;
     }
 
     /**
      *
-     * @return
-     */
-    private byte[][] makeBoundaryGrid() {
-
-        byte[][] boundary = new byte[vertical + 2][horizontal + 2];
-
-        // copy the current state to the boundary array.
-        for (int i = 1; i <= vertical; i++) {
-            System.arraycopy(currentGeneration[i - 1], 0, boundary[i], 1, horizontal);
-        }
-
-        return boundary;
-    }
-
-    /**
-     *
-     * @param boundary
      * @param x
      * @param y
      * @return
      */
-    private byte countLiveNeighbourCells(byte[][] boundary, int x, int y) {
-        byte neighbours[][] = new byte[3][3];
+    private byte countLiveNeighbourCells(final int x, final int y) {
 
-        // extract 2-dim 3x3 array of the 8 neighbours for the given cell.
-        for (int i = 0; i < 3; i++) {
-            System.arraycopy(boundary[x + i], y, neighbours[i], 0, 3);
-        }
-        neighbours[1][1] = 0;
+        int minX = x <= 0 ? 0 : x - 1;
+        int maxX = x >= vertical - 1 ? vertical - 1: x + 1;
+        int minY = y <= 0 ? 0 : y - 1;
+        int maxY = y >= horizontal - 1 ? horizontal - 1: y + 1;
 
         byte sum = 0;
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                sum += neighbours[i][j];
+        for (int i = minX; i <= maxX; i++) {
+            for (int j = minY; j <= maxY; j++) {
+                sum += currentGeneration[i][j];
             }
         }
-
+        sum -= currentGeneration[x][y];
         return sum;
     }
 
@@ -186,10 +165,10 @@ class GameOfLife {
         for (int i = 0; i < vertical; i++) {
             for (int j = 0; j < horizontal; j++) {
                 if (currentGeneration[i][j] == 1) {
-                    // present the live cell by black square character, ◾
+                    // Present the live cell by black square character
                     builder.append("◾");
                 } else {
-                    // present out the dead cell by white square character, ◽
+                    // Present the dead cell by white square character
                     builder.append("◽");
                 }
             }
