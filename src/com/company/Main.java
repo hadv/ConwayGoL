@@ -5,18 +5,13 @@ import java.util.BitSet;
 /**
  * Outline: Conway Game Of Life
  *
- * 1. Copy the current generation to next generation:
- *      Because using <code>System.arraycopy()</code> to copy 2 dimension have a problem
- *      of the source and the destination array will point to the same object.
- *      So we will copy each one dimension array of the 2-dim arrays in method <code>copy2DimIntArray()</code>.
- *
- * 2. At each step in time, looping all cells in the current generation.
- *      2.1 If the cell is dead and have exactly 3 live cells neighbours becomes a live cell
- *      2.2 If the cell is live cell
- *          (1) If live cell with fewer than two live neighbours dies
- *          (2) If live cell with more than three live neighbours dies, as if by overcrowding.
- *      2.3 Otherwise, keep the current state of the cell (nothing change)
- *      2.4 Print out the current state of the system to console.
+ * At each step in time, looping all cells in the current generation.
+ *      1. If the cell is dead and have exactly 3 live cells neighbours becomes a live cell
+ *      2. If the cell is live cell
+ *          (a) If live cell with fewer than two live neighbours dies
+ *          (b) If live cell with more than three live neighbours dies, as if by overcrowding.
+ *      3. Otherwise, keep the current state of the cell (nothing change)
+ *      4. Print out the current state of the system to console.
  *
  * @author  Dang Viet Ha (dvietha@gmail.com)
  */
@@ -70,8 +65,14 @@ public class Main {
  */
 class GameOfLife {
 
-    // Store the state of the current generation
+    // Storing state of the current generation system
     private BitSet currentGeneration;
+
+    // Storing state of the next generation system
+    private BitSet nextGeneration;
+
+    // Using to swap the state of current generation and next generation
+    private BitSet tempGeneration;
 
     private int horizontal;
 
@@ -98,6 +99,8 @@ class GameOfLife {
             throw new UnsupportedOperationException();
         }
         currentGeneration = new BitSet(vertical*horizontal);
+        nextGeneration = new BitSet(vertical*horizontal);
+        tempGeneration = new BitSet(vertical*horizontal);
         setCurrentGeneration(seedOfTheSystem);
     }
 
@@ -113,7 +116,6 @@ class GameOfLife {
      *
      */
     public void nextGeneration() {
-        BitSet nextGeneration = new BitSet(vertical*horizontal);
         // At each step time, looping all cells in the current generation to apply the rules
         for (int i = 0; i < vertical; i++) {
             for (int j = 0; j < horizontal; j++) {
@@ -134,9 +136,10 @@ class GameOfLife {
                 }
             }
         }
-
-        // Store the next generation to the current generation
-        currentGeneration = nextGeneration;
+        // Swap the next generation and the current generation
+        tempGeneration = nextGeneration;
+        nextGeneration = currentGeneration;
+        currentGeneration = tempGeneration;
     }
 
     /**
