@@ -68,10 +68,8 @@ class GameOfLife {
     // Storing state of the current generation system
     private BitSet currentGeneration;
 
-    // Storing state of the next generation system
-    private BitSet nextGeneration;
-
-    // Using to swap the state of current generation and next generation
+    // Using to store temporarily the state of the next generation
+    // to avoid allocating new generation at each step time
     private BitSet tempGeneration;
 
     private int horizontal;
@@ -98,9 +96,8 @@ class GameOfLife {
         if (horizontal < 1) {
             throw new UnsupportedOperationException();
         }
-        currentGeneration = new BitSet(vertical*horizontal);
-        nextGeneration = new BitSet(vertical*horizontal);
-        tempGeneration = new BitSet(vertical*horizontal);
+        currentGeneration = new BitSet(vertical * horizontal);
+        tempGeneration = new BitSet(vertical * horizontal);
         setCurrentGeneration(seedOfTheSystem);
     }
 
@@ -113,7 +110,6 @@ class GameOfLife {
      *   <li>Any live cell with more than three live neighbours dies, as if by overcrowding.</li>
      *   <li>Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.</li>
      * </ul>
-     *
      */
     public void nextGeneration() {
         // At each step time, looping all cells in the current generation to apply the rules
@@ -123,23 +119,23 @@ class GameOfLife {
                 // If the cell is dead and have exactly 3 live cells neighbours becomes a live cell
                 if (!currentGeneration.get(getIndex(i, j))) {
                     if (liveCellNeighbours == 3) {
-                        nextGeneration.set(getIndex(i, j));
+                        tempGeneration.set(getIndex(i, j));
                     }
                 } else { // If the cell is live cell
                     // If live cell with fewer than two live neighbours dies
                     // If live cell with more than three live neighbours dies, as if by overcrowding.
                     if (liveCellNeighbours < 2 || liveCellNeighbours > 3) {
-                        nextGeneration.clear(getIndex(i, j));
+                        tempGeneration.clear(getIndex(i, j));
                     } else { // Otherwise, keep the current state of the cell
-                        nextGeneration.set(getIndex(i, j), currentGeneration.get(getIndex(i, j)));
+                        tempGeneration.set(getIndex(i, j), currentGeneration.get(getIndex(i, j)));
                     }
                 }
             }
         }
-        // Swap the next generation and the current generation
-        tempGeneration = nextGeneration;
-        nextGeneration = currentGeneration;
+        // Swap the next generation to the current generation for the next step time
+        BitSet bs = currentGeneration;
         currentGeneration = tempGeneration;
+        tempGeneration = bs;
     }
 
     /**
