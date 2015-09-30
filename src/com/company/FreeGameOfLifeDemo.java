@@ -4,51 +4,45 @@ import java.util.BitSet;
 
 /**
  * Outline: Conway Game Of Life
- *
- * At each step in time, looping all cells in the current generation.
- *      1. If the cell is dead and have exactly 3 live cells neighbours becomes a live cell
- *      2. If the cell is live cell
- *          (a) If live cell with fewer than two live neighbours dies
- *          (b) If live cell with more than three live neighbours dies, as if by overcrowding.
- *      3. Otherwise, keep the current state of the cell (nothing change)
- *      4. Print out the current state of the system to console.
+ * <p>
+ *     The universe of the Game of Life is an infinite two-dimensional orthogonal grid of square cells,
+ *     each of which is in one of two possible states, alive or dead.
+ *     Every cell interacts with its eight neighbours, which are the cells
+ *     that are horizontally, vertically, or diagonally adjacent.
+ *     At each step in time, the following transitions occur:
+ * <ol>
+ *     <li>Any live cell with fewer than two live neighbours dies, as if caused by under-population.
+ *     <li>Any live cell with two or three live neighbours lives on to the next generation.
+ *     <li>Any live cell with more than three live neighbours dies, as if by over-population.
+ *     <li>Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
+ * </ol>
+ * <p>
+ *     The initial pattern constitutes the seed of the system.
+ *     The first generation is created by applying the above rules simultaneously
+ *     to every cell in the seed-births and deaths occur simultaneously,
+ *     and the discrete moment at which this happens is sometimes called a tick
+ *     (in other words, each generation is a pure function of the preceding one).
+ *     The rules continue to be applied repeatedly to create further generations.
  *
  * @author  Dang Viet Ha (dvietha@gmail.com)
  */
 public class FreeGameOfLifeDemo {
-
     /**
      * Running Game Of Life demo with some seed pattern.
      *
-     * @param args
+     * @param args input arguments for the program
      * @throws InterruptedException
      */
     public static void main(String[] args) throws InterruptedException {
-
-        // Blinker (period 2)
-        byte blinkerSeed[][] = {
-                {0, 0, 0, 0, 0},
-                {0, 0, 1, 0, 0},
-                {0, 0, 1, 0, 0},
-                {0, 0, 1, 0, 0},
-                {0, 0, 0, 0, 0}
-        };
-
         // Beacon (period 2)
-        // 0: dead, 1: live, 2: out-of-map
-        byte beaconSeed[][] = {
-                {0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2},
-                {0, 1, 1, 0, 0, 0, 2, 2, 2, 2, 2, 2},
-                {0, 1, 1, 0, 0, 0, 2, 2, 2, 2, 2, 2},
-                {0, 0, 0, 1, 1, 0, 2, 2, 2, 2, 2, 2},
-                {0, 0, 0, 1, 1, 0, 2, 2, 2, 2, 2, 2},
-                {0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2},
-                {2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0},
-                {2, 2, 2, 2, 2, 2, 0, 1, 1, 0, 0, 0},
-                {2, 2, 2, 2, 2, 2, 0, 1, 1, 0, 0, 0},
-                {2, 2, 2, 2, 2, 2, 0, 0, 0, 1, 1, 0},
-                {2, 2, 2, 2, 2, 2, 0, 0, 0, 1, 1, 0},
-                {2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0},
+        // 0: dead, 1: live
+        final byte beaconSeed[][] = {
+                {0, 0, 0, 0, 0, 0},
+                {0, 1, 1, 0, 0, 0},
+                {0, 1, 1, 0, 0, 0},
+                {0, 0, 0, 1, 1, 0},
+                {0, 0, 0, 1, 1, 0},
+                {0, 0, 0, 0, 0, 0}
         };
 
         // Initialize the Game Of Life with a given seed
@@ -71,7 +65,6 @@ public class FreeGameOfLifeDemo {
  *
  */
 class FreeGameOfLife {
-
     // Storing state of the current generation system
     private BitSet currentGeneration;
 
@@ -87,16 +80,17 @@ class FreeGameOfLife {
     private int vertical;
 
     /**
-     * Initialize the current state of the system with a given seed
+     * Initialize the current state of the system with a given seed.
      *
      * @param seedOfTheSystem   seed of the system
-     * @throws UnsupportedOperationException throw <code>UnsupportedOperationException</code>
-     *          if the input null value for <code>seedOfTheSystem</code>
+     * @throws UnsupportedOperationException throw {@link UnsupportedOperationException}
+     *          if the input {@code null} value for {@code seedOfTheSystem}
      */
-    public FreeGameOfLife(byte[][] seedOfTheSystem) {
+    public FreeGameOfLife(final byte[][] seedOfTheSystem) {
         if (seedOfTheSystem == null) {
             throw new UnsupportedOperationException();
         }
+
         vertical = seedOfTheSystem.length;
         if (vertical < 1) {
             throw new UnsupportedOperationException();
@@ -106,18 +100,18 @@ class FreeGameOfLife {
         if (horizontal < 1) {
             throw new UnsupportedOperationException();
         }
+
         initSystemState(seedOfTheSystem);
     }
 
     /**
-     * Transition to the next generation by applying the below rule
-     *
-     * <ul>
-     *   <li>Any live cell with fewer than two live neighbours dies, as if caused by under-population.</li>
-     *   <li>Any live cell with two or three live neighbours lives on to the next generation.</li>
-     *   <li>Any live cell with more than three live neighbours dies, as if by overcrowding.</li>
-     *   <li>Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.</li>
-     * </ul>
+     * <p>Transition to the next generation by applying the Conway's Game Of Life rule.
+     * <ol>
+     *   <li>Any live cell with fewer than two live neighbours dies, as if caused by under-population.
+     *   <li>Any live cell with two or three live neighbours lives on to the next generation.
+     *   <li>Any live cell with more than three live neighbours dies, as if by overcrowding.
+     *   <li>Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
+     * </ol>
      */
     public void nextGeneration() {
         // At each step time, looping all cells in the current generation to apply the rules
@@ -151,14 +145,13 @@ class FreeGameOfLife {
     }
 
     /**
-     * Count the live cell neighbours to given cell
+     * Count the live cell neighbours to given cell.
      *
      * @param x The x position of the cell
      * @param y The y position of the cell
-     * @return he total number of live cell neighbours to the given cell
+     * @return The total number of live cell neighbours to the given cell
      */
     private byte countLiveNeighbourCells(final int x, final int y) {
-
         int minX = x <= 0 ? 0 : x - 1;
         int maxX = x >= vertical - 1 ? vertical - 1: x + 1;
         int minY = y <= 0 ? 0 : y - 1;
@@ -178,7 +171,7 @@ class FreeGameOfLife {
     }
 
     /**
-     * Calculate the index of the <code>BitSet</code> vector from input grid cell
+     * Calculate the index of the {@code BitSet} from input grid cell.
      *
      * @param x The x position of the cell
      * @param y The y position of the cell
@@ -193,7 +186,7 @@ class FreeGameOfLife {
      *
      * @param seed  seed of the system
      */
-    private void initSystemState(byte[][] seed) {
+    private void initSystemState(final byte[][] seed) {
         currentGeneration = new BitSet(vertical * horizontal);
         tempGeneration = new BitSet(vertical * horizontal);
         gridMap = new BitSet(vertical * horizontal);
@@ -210,7 +203,6 @@ class FreeGameOfLife {
             }
         }
     }
-
 
     @Override
     public String toString() {
