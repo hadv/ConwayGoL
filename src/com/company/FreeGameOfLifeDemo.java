@@ -3,7 +3,7 @@ package com.company;
 import java.util.BitSet;
 
 /**
- * Outline: Conway Game Of Life
+ * Outline: Conway's Game Of Life
  * <p>
  *     The universe of the Game of Life is an infinite two-dimensional orthogonal grid of square cells,
  *     each of which is in one of two possible states, alive or dead.
@@ -24,7 +24,7 @@ import java.util.BitSet;
  *     (in other words, each generation is a pure function of the preceding one).
  *     The rules continue to be applied repeatedly to create further generations.
  *
- * @author  Dang Viet Ha (dvietha@gmail.com)
+ * @author Dang Viet Ha (dvietha@gmail.com)
  */
 public class FreeGameOfLifeDemo {
     /**
@@ -34,19 +34,19 @@ public class FreeGameOfLifeDemo {
      * @throws InterruptedException
      */
     public static void main(String[] args) throws InterruptedException {
-        // Beacon (period 2)
-        // 0: dead, 1: live
-        final byte beaconSeed[][] = {
+        // Glider
+        final byte gliderSeed[][] = {
                 {0, 0, 0, 0, 0, 0},
-                {0, 1, 1, 0, 0, 0},
-                {0, 1, 1, 0, 0, 0},
-                {0, 0, 0, 1, 1, 0},
-                {0, 0, 0, 1, 1, 0},
+                {0, 0, 0, 1, 0, 0},
+                {0, 1, 0, 1, 0 ,0},
+                {0, 0, 1, 1, 0 ,0},
                 {0, 0, 0, 0, 0, 0}
         };
 
+
+
         // Initialize the Game Of Life with a given seed
-        FreeGameOfLife life = new FreeGameOfLife(beaconSeed);
+        FreeGameOfLife life = new FreeGameOfLife(gliderSeed);
 
         while (true) {
             // Print out the current state of the system
@@ -72,9 +72,6 @@ class FreeGameOfLife {
     // to avoid allocating new generation at each step time
     private BitSet tempGeneration;
 
-    // Storing the grid map of the system to determine the cell is in or out of the map.
-    private BitSet gridMap;
-
     private int horizontal;
 
     private int vertical;
@@ -82,9 +79,9 @@ class FreeGameOfLife {
     /**
      * Initialize the current state of the system with a given seed.
      *
-     * @param seedOfTheSystem   seed of the system
+     * @param seedOfTheSystem seed of the system
      * @throws UnsupportedOperationException throw {@link UnsupportedOperationException}
-     *          if the input {@code null} value for {@code seedOfTheSystem}
+     *                                       if the input {@code null} value for {@code seedOfTheSystem}
      */
     public FreeGameOfLife(final byte[][] seedOfTheSystem) {
         if (seedOfTheSystem == null) {
@@ -107,10 +104,10 @@ class FreeGameOfLife {
     /**
      * <p>Transition to the next generation by applying the Conway's Game Of Life rule.
      * <ol>
-     *   <li>Any live cell with fewer than two live neighbours dies, as if caused by under-population.
-     *   <li>Any live cell with two or three live neighbours lives on to the next generation.
-     *   <li>Any live cell with more than three live neighbours dies, as if by overcrowding.
-     *   <li>Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
+     *     <li>Any live cell with fewer than two live neighbours dies, as if caused by under-population.
+     *     <li>Any live cell with two or three live neighbours lives on to the next generation.
+     *     <li>Any live cell with more than three live neighbours dies, as if by overcrowding.
+     *     <li>Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
      * </ol>
      */
     public void nextGeneration() {
@@ -118,12 +115,7 @@ class FreeGameOfLife {
         for (int i = 0; i < vertical; i++) {
             for (int j = 0; j < horizontal; j++) {
                 int idx = getIndex(i, j);
-
-                // if the cell is out of map then move to next cell
-                if (!gridMap.get(idx)) continue;
-
                 byte liveCellNeighbours = countLiveNeighbourCells(i, j);
-
                 // If the cell is dead and have exactly 3 live cells neighbours becomes a live cell
                 if (!currentGeneration.get(idx)) {
                     if (liveCellNeighbours == 3)
@@ -142,6 +134,10 @@ class FreeGameOfLife {
         BitSet bs = currentGeneration;
         currentGeneration = tempGeneration;
         tempGeneration = bs;
+
+        // After each step then extend the grid if need
+        extendGrid();
+        tempGeneration = new BitSet(vertical * horizontal);
     }
 
     /**
@@ -153,15 +149,14 @@ class FreeGameOfLife {
      */
     private byte countLiveNeighbourCells(final int x, final int y) {
         int minX = x <= 0 ? 0 : x - 1;
-        int maxX = x >= vertical - 1 ? vertical - 1: x + 1;
+        int maxX = x >= vertical - 1 ? vertical - 1 : x + 1;
         int minY = y <= 0 ? 0 : y - 1;
-        int maxY = y >= horizontal - 1 ? horizontal - 1: y + 1;
+        int maxY = y >= horizontal - 1 ? horizontal - 1 : y + 1;
 
         byte count = 0;
         for (int i = minX; i <= maxX; i++) {
             for (int j = minY; j <= maxY; j++) {
-                int idx = getIndex(i, j);
-                if (currentGeneration.get(idx) && gridMap.get(idx)) {
+                if (currentGeneration.get(getIndex(i, j))) {
                     count++;
                 }
             }
@@ -184,24 +179,215 @@ class FreeGameOfLife {
     /**
      * Set the current state of the system from given seed.
      *
-     * @param seed  seed of the system
+     * @param seed seed of the system
      */
     private void initSystemState(final byte[][] seed) {
         currentGeneration = new BitSet(vertical * horizontal);
-        tempGeneration = new BitSet(vertical * horizontal);
-        gridMap = new BitSet(vertical * horizontal);
         for (int i = 0; i < vertical; i++) {
             for (int j = 0; j < horizontal; j++) {
-                int s = seed[i][j];
-                int idx = getIndex(i, j);
-                if (s == 1)
-                    currentGeneration.set(idx);
-
-                if (s == 0 || s == 1) {
-                    gridMap.set(idx);
+                if (seed[i][j] == 1) {
+                    currentGeneration.set(getIndex(i, j));
                 }
             }
         }
+        // Extend the grid of the system if need
+        extendGrid();
+        tempGeneration = new BitSet(vertical * horizontal);
+    }
+
+    /**
+     * Extend the grid after each time step of the system.
+     */
+    private void extendGrid() {
+        if (shouldExtendEast()) {
+            extendEast();
+        }
+
+        if (shouldExtendNorth()) {
+            extendNorth();
+        }
+
+        if (shouldExtendSouth()) {
+            extendSouth();
+        }
+
+        if (shouldExtendWest()) {
+            extendWest();
+        }
+    }
+
+    /**
+     * Check if the current grid need to extend outward to north or not.
+     * <p>If on the north border of the grid have 3 or more live cells adjacent,
+     * the the grid need to extend one to the north.
+     *
+     * @return {@code true} if need extend to the north; otherwise {@code false}
+     */
+    private boolean shouldExtendNorth() {
+        byte count = 0;
+        for (int i = 0; i < horizontal; i++) {
+            if (currentGeneration.get(getIndex(0, i))) {
+                count++;
+                if (count == 3) {
+                    return true;
+                }
+            } else {
+                count = 0;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Check if the current grid need to extend outward to south or not.
+     * <p>If on the south border of the grid have 3 or more live cells adjacent,
+     * the the grid need to extend one to the south.
+     *
+     * @return {@code true} if need extend to the south; otherwise {@code false}
+     */
+    private boolean shouldExtendSouth() {
+        byte count = 0;
+        for (int i = 0; i < horizontal; i++) {
+            if (currentGeneration.get(getIndex(vertical - 1, i))) {
+                count++;
+                if (count == 3) {
+                    return true;
+                }
+            } else {
+                count = 0;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Check if the current grid need to extend outward to west or not.
+     * <p>If on the west border of the grid have 3 or more live cells adjacent,
+     * the the grid need to extend one to the north.
+     *
+     * @return {@code true} if need extend to the west; otherwise {@code false}
+     */
+    private boolean shouldExtendWest() {
+        byte count = 0;
+        for (int i = 0; i < vertical; i++) {
+            if (currentGeneration.get(getIndex(i, 0))) {
+                count++;
+                if (count == 3) {
+                    return true;
+                }
+
+            } else {
+                count = 0;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Check if the current grid need to extend outward to east or not.
+     * <p>If on the east border of the grid have 3 or more live cells adjacent,
+     * the the grid need to extend one to the north.
+     *
+     * @return {@code true} if need extend to the east; otherwise {@code false}
+     */
+    private boolean shouldExtendEast() {
+        byte count = 0;
+        for (int i = 0; i < vertical; i++) {
+            if (currentGeneration.get(getIndex(i, horizontal - 1))) {
+                count++;
+                if (count == 3) {
+                    return true;
+                }
+
+            } else {
+                count = 0;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Extend the grid to the north.
+     */
+    private void extendNorth() {
+        byte[] b = toByteArray();
+        byte[] bb = new byte[b.length + horizontal];
+        System.arraycopy(b, 0, bb, horizontal, b.length);
+        vertical++;
+        currentGeneration = valueOf(bb);
+    }
+
+    /**
+     * Extend the grid to the south.
+     */
+    private void extendSouth() {
+        byte[] b = toByteArray();
+        byte[] bb = new byte[b.length + horizontal];
+        System.arraycopy(b, 0, bb, 0, b.length);
+        vertical++;
+        currentGeneration = valueOf(bb);
+    }
+
+    /**
+     * Extend the grid to the west.
+     */
+    private void extendWest() {
+        byte[] b = toByteArray();
+        byte[] bb = new byte[b.length + vertical];
+
+        for (int i = 0; i < vertical; i++) {
+            System.arraycopy(b, i * horizontal, bb, (i * (horizontal + 1)) + 1, horizontal);
+        }
+        horizontal++;
+        currentGeneration = valueOf(bb);
+    }
+
+    /**
+     * Extend the grid to the east.
+     */
+    private  void extendEast() {
+        byte[] b = toByteArray();
+        byte[] bb = new byte[b.length + vertical];
+
+        for (int i = 0; i < vertical; i++) {
+            System.arraycopy(b, i * horizontal, bb, i * (horizontal + 1), horizontal);
+        }
+        horizontal++;
+        currentGeneration = valueOf(bb);
+    }
+
+    /**
+     * Convert the current state to {@code byte[]} array.
+     * @return The {@code byte[]} array present the current state of the system.
+     */
+    private byte[] toByteArray() {
+        int size = vertical * horizontal;
+        byte[] temp = new byte[size];
+        for (int i = 0; i < size; i++) {
+            if (currentGeneration.get(i)) {
+                temp[i] = 1;
+            } else {
+                temp[i] = 0;
+            }
+        }
+        return  temp;
+    }
+
+    /**
+     * Create BitSet from a given {@code byte[]} array.
+     * @param bytes input byte array
+     * @return The BitSet that created from {@code byte[]} array.
+     */
+    private BitSet valueOf(final byte[] bytes) {
+        int size = horizontal * vertical;
+        BitSet bs = new BitSet(size);
+
+        for (int i = 0; i < size; i++) {
+            if (bytes[i] == 1) {
+                bs.set(i);
+            }
+        }
+        return  bs;
     }
 
     @Override
@@ -211,23 +397,16 @@ class FreeGameOfLife {
         for (int i = 0; i < vertical; i++) {
             for (int j = 0; j < horizontal; j++) {
                 int idx = getIndex(i, j);
-
-                if (!gridMap.get(idx)) {
-                    // Present the out-of-map by blank character
-                    builder.append(" ");
+                if (currentGeneration.get(idx)) {
+                    // Present the live cell by black square character
+                    builder.append("◾");
                 } else {
-                    if (currentGeneration.get(idx)) {
-                        // Present the live cell by black square character
-                        builder.append("◾");
-                    } else {
-                        // Present the dead cell by white square character
-                        builder.append("◽");
-                    }
+                    // Present the dead cell by white square character
+                    builder.append("◽");
                 }
             }
             builder.append("\n");
         }
-
         return builder.toString();
     }
 }
