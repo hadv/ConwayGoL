@@ -39,8 +39,8 @@ public class ConwayGOL {
         final byte gliderSeed[][] = {
                 {0, 0, 0, 0, 0, 0},
                 {0, 0, 0, 1, 0, 0},
-                {0, 1, 0, 1, 0 ,0},
-                {0, 0, 1, 1, 0 ,0},
+                {0, 1, 0, 1, 0, 0},
+                {0, 0, 1, 1, 0, 0},
                 {0, 0, 0, 0, 0, 0}
         };
 
@@ -52,7 +52,7 @@ public class ConwayGOL {
             System.out.println(life.toString());
 
             // Transition to the next generation by applying the rule
-            life.nextGeneration();
+            life.evolve();
 
             // Do nothing but delay program some seconds to see the result of each step time.
             Thread.sleep(1000);
@@ -91,7 +91,7 @@ class ConwayGameOfLife {
      *
      * @param seedOfTheSystem seed of the system
      * @throws UnsupportedOperationException throw {@link UnsupportedOperationException}
-     *                                       if the input {@code null} value for {@code seedOfTheSystem}
+     * if the input {@code null} value for {@code seedOfTheSystem}
      */
     public ConwayGameOfLife(final byte[][] seedOfTheSystem) {
         if (seedOfTheSystem == null) {
@@ -122,23 +122,27 @@ class ConwayGameOfLife {
      *     <li>Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
      * </ol>
      */
-    public void nextGeneration() {
-        // At each step time, looping all cells in the current generation to apply the rules
-        for (int i = verticalTop; i <= verticalBottom; i++) {
-            for (int j = horizontalLeft; j <= horizontalRight; j++) {
-                Point p = new Point(i, j);
-                byte liveCellNeighbours = countLiveNeighbourCells(i, j);
-                // If the cell is dead and have exactly 3 live cells neighbours becomes a live cell
-                if (currentGeneration.get(p) == null) {
-                    if (liveCellNeighbours == 3)
-                        tempGeneration.put(p, LIVE_CELL_VAL);
-                } else { // If the cell is live cell
-                    // If live cell with fewer than two live neighbours dies
-                    // If live cell with more than three live neighbours dies, as if by overcrowding.
-                    if (liveCellNeighbours < 2 || liveCellNeighbours > 3)
-                        tempGeneration.remove(p);
-                    else // Otherwise, keep the current state of the live cell
-                        tempGeneration.put(p, LIVE_CELL_VAL);
+    public void evolve() {
+        // At each step time, looping all live cells in the current generation to evolve
+        for (Map.Entry<Point, Byte> entry : currentGeneration.entrySet()) {
+            Point p = entry.getKey();
+            byte liveCellNeighbours = countLiveNeighbourCells(p);
+            // If live cell with fewer than two live neighbours dies
+            // If live cell with more than three live neighbours dies, as if by overcrowding.
+            if (liveCellNeighbours < 2 || liveCellNeighbours > 3)
+                tempGeneration.remove(p);
+            else // Otherwise, keep the current state of the live cell
+                tempGeneration.put(p, entry.getValue());
+
+            // Check if any dead cells around current live cell will become live cell or not
+            for (int i = p.getX() - 1; i <= p.getX() + 1; i++) {
+                for (int j = p.getY() - 1; j <= p.getY() + 1; j++) {
+                    Point pt = new Point(i, j);
+                    if (currentGeneration.get(pt) == null) {
+                        if (countLiveNeighbourCells(pt) == 3) {
+                            tempGeneration.put(pt, LIVE_CELL_VAL);
+                        }
+                    }
                 }
             }
         }
@@ -155,22 +159,19 @@ class ConwayGameOfLife {
     /**
      * Count the live cell neighbours to given cell.
      *
-     * @param x The x position of the cell
-     * @param y The y position of the cell
-     * @return The total number of live cell neighbours to the given cell
+     * @param point The position of the cell
+     * @return The total number of live cell neighbours to the given poistion cell
      */
-    private byte countLiveNeighbourCells(final int x, final int y) {
+    private byte countLiveNeighbourCells(final Point point) {
 
         byte count = 0;
-        for (int i = x - 1; i <= x + 1; i++) {
-            for (int j = y - 1 ; j <= y + 1; j++) {
-                Point p = new Point(i, j);
-                if (currentGeneration.get(p) != null) {
-                    count++;
-                }
+        for (int i = point.getX() - 1; i <= point.getX() + 1; i++) {
+            for (int j = point.getY() - 1; j <= point.getY() + 1; j++) {
+                if (currentGeneration.get(new Point(i, j)) != null) count++;
             }
         }
-        if (currentGeneration.get(new Point(x, y)) != null) count--;
+
+        if (currentGeneration.get(point) != null) count--;
         return count;
     }
 
@@ -334,7 +335,6 @@ class ConwayGameOfLife {
  *
  */
 class Point {
-
     private int x;
 
     private int y;
@@ -342,6 +342,14 @@ class Point {
     public Point(int x, int y) {
         this.x = x;
         this.y = y;
+    }
+
+    public int getX() {
+        return x;
+    }
+
+    public int getY() {
+        return y;
     }
 
     @Override
