@@ -70,6 +70,18 @@ class ConwayGameOfLife {
     // The constant 1 value to present the live cell
     private static final byte LIVE_CELL_VAL = 1;
 
+    // Eight neighbours
+    private static final byte[][] NEIGHBOUR_CELL = {
+            {-1, -1}, // NW
+            {-1,  0}, // N
+            {-1,  1}, // NE
+            { 0, -1}, // W
+            { 0,  1}, // E
+            { 1, -1}, // SW
+            { 1,  0}, // S
+            { 1,  1}  // SE
+    };
+
     /**
      * Initialize the current state of the system with a given seed.
      *
@@ -97,24 +109,22 @@ class ConwayGameOfLife {
     public void evolve() {
         Map<Point, Byte> tempGeneration = new HashMap<Point, Byte>();
         // At each step time, looping all live cells in the current generation to evolve
-        for (Map.Entry<Point, Byte> entry : currentGeneration.entrySet()) {
-            Point p = entry.getKey();
+        for (Point p : currentGeneration.keySet()) {
             byte liveCellNeighbours = countLiveNeighbourCells(p);
-            // If live cell with fewer than two live neighbours dies
-            // If live cell with more than three live neighbours dies, as if by overcrowding.
+
+            // Any live cell with fewer than two live neighbours dies, as if caused by under-population.
+            // Any live cell with more than three live neighbours dies, as if by overcrowding.
             if (liveCellNeighbours < 2 || liveCellNeighbours > 3)
                 tempGeneration.remove(p);
-            else // Otherwise, keep the current state of the live cell
-                tempGeneration.put(p, entry.getValue());
+            else // Any live cell with two or three live neighbours lives on to the next generation.
+                tempGeneration.put(p, LIVE_CELL_VAL);
 
-            // Check if any dead cells around current live cell will become live cell or not
-            for (int i = p.getX() - 1; i <= p.getX() + 1; i++) {
-                for (int j = p.getY() - 1; j <= p.getY() + 1; j++) {
-                    Point pt = new Point(i, j);
-                    if (currentGeneration.get(pt) == null) {
-                        if (countLiveNeighbourCells(pt) == 3) {
-                            tempGeneration.put(pt, LIVE_CELL_VAL);
-                        }
+            // Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
+            for (byte[] n : NEIGHBOUR_CELL) {
+                Point pt = p.move(n);
+                if (currentGeneration.get(pt) == null) {
+                    if (countLiveNeighbourCells(pt) == 3) {
+                        tempGeneration.put(pt, LIVE_CELL_VAL);
                     }
                 }
             }
@@ -127,18 +137,17 @@ class ConwayGameOfLife {
      * Count the live cell neighbours to given cell.
      *
      * @param point The position of the cell
-     * @return The total number of live cell neighbours to the given poistion cell
+     * @return The total number of live cell neighbours to the given position cell
      */
     private byte countLiveNeighbourCells(final Point point) {
 
         byte count = 0;
-        for (int i = point.getX() - 1; i <= point.getX() + 1; i++) {
-            for (int j = point.getY() - 1; j <= point.getY() + 1; j++) {
-                if (currentGeneration.get(new Point(i, j)) != null) count++;
+
+        for (byte[] n : NEIGHBOUR_CELL) {
+            if (currentGeneration.get(point.move(n)) != null) {
+                count++;
             }
         }
-
-        if (currentGeneration.get(point) != null) count--;
         return count;
     }
 
@@ -152,8 +161,7 @@ class ConwayGameOfLife {
         for (int i = 0; i < seed.length; i++) {
             for (int j = 0; j < seed[i].length; j++) {
                 if (seed[i][j] == 1) {
-                    Point p = new Point(i, j);
-                    currentGeneration.put(p, LIVE_CELL_VAL);
+                    currentGeneration.put(new Point(i, j), LIVE_CELL_VAL);
                 }
             }
         }
@@ -193,12 +201,8 @@ class Point {
         this.y = y;
     }
 
-    public int getX() {
-        return x;
-    }
-
-    public int getY() {
-        return y;
+    public Point move(final byte[] step) {
+        return new Point(x + step[0], y + step[1]);
     }
 
     @Override
