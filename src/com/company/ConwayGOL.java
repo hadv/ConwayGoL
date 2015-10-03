@@ -67,22 +67,6 @@ class ConwayGameOfLife {
     // Storing state of the current generation system
     private Map<Point, Byte> currentGeneration;
 
-    // Using to store temporarily the state of the next generation
-    // to avoid allocating new generation at each step time
-    private Map<Point, Byte> tempGeneration;
-
-    // The right border of the grid
-    private int horizontalRight;
-
-    // The left border of the grid
-    private int horizontalLeft;
-
-    // The top border of the grid
-    private int verticalTop;
-
-    // The bottom border of the grid
-    private int verticalBottom;
-
     // The constant 1 value to present the live cell
     private static final byte LIVE_CELL_VAL = 1;
 
@@ -94,19 +78,7 @@ class ConwayGameOfLife {
      * if the input {@code null} value for {@code seedOfTheSystem}
      */
     public ConwayGameOfLife(final byte[][] seedOfTheSystem) {
-        if (seedOfTheSystem == null) {
-            throw new UnsupportedOperationException();
-        }
-
-        verticalTop = 0;
-        verticalBottom = seedOfTheSystem.length - 1;
-        if (verticalBottom < 1) {
-            throw new UnsupportedOperationException();
-        }
-
-        horizontalLeft = 0;
-        horizontalRight = seedOfTheSystem[0].length - 1;
-        if (horizontalRight < 1) {
+        if (seedOfTheSystem == null || seedOfTheSystem.length == 0) {
             throw new UnsupportedOperationException();
         }
 
@@ -123,6 +95,7 @@ class ConwayGameOfLife {
      * </ol>
      */
     public void evolve() {
+        Map<Point, Byte> tempGeneration = new HashMap<Point, Byte>();
         // At each step time, looping all live cells in the current generation to evolve
         for (Map.Entry<Point, Byte> entry : currentGeneration.entrySet()) {
             Point p = entry.getKey();
@@ -147,13 +120,7 @@ class ConwayGameOfLife {
             }
         }
         // Swap the next generation to the current generation for the next step time
-        Map<Point, Byte> map = currentGeneration;
         currentGeneration = tempGeneration;
-        tempGeneration = map;
-        tempGeneration.clear();
-
-        // After each step then extend the grid if need
-        extendGrid();
     }
 
     /**
@@ -182,140 +149,22 @@ class ConwayGameOfLife {
      */
     private void initSystemState(final byte[][] seed) {
         currentGeneration = new HashMap<Point, Byte>();
-        tempGeneration = new HashMap<Point, Byte>();
-        for (int i = verticalTop; i <= verticalBottom; i++) {
-            for (int j = horizontalLeft; j <= horizontalRight; j++) {
+        for (int i = 0; i < seed.length; i++) {
+            for (int j = 0; j < seed[i].length; j++) {
                 if (seed[i][j] == 1) {
                     Point p = new Point(i, j);
                     currentGeneration.put(p, LIVE_CELL_VAL);
                 }
             }
         }
-        // Extend the grid of the system if need
-        extendGrid();
-    }
-
-    /**
-     * Extend the grid after each time step of the system.
-     */
-    private void extendGrid() {
-        if (shouldExtendEast()) {
-            horizontalRight++;
-        }
-
-        if (shouldExtendNorth()) {
-            verticalTop--;
-        }
-
-        if (shouldExtendSouth()) {
-            verticalBottom++;
-        }
-
-        if (shouldExtendWest()) {
-            horizontalLeft--;
-        }
-    }
-
-    /**
-     * Check if the current grid need to extend outward to north or not.
-     * <p>If on the north border of the grid have 3 or more live cells adjacent,
-     * the the grid need to extend one to the north.
-     *
-     * @return {@code true} if need extend to the north; otherwise {@code false}
-     */
-    private boolean shouldExtendNorth() {
-        byte count = 0;
-        for (int i = horizontalLeft; i <= horizontalRight; i++) {
-            Point p = new Point(verticalTop, i);
-            if (currentGeneration.get(p) != null) {
-                count++;
-                if (count == 3) {
-                    return true;
-                }
-            } else {
-                count = 0;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Check if the current grid need to extend outward to south or not.
-     * <p>If on the south border of the grid have 3 or more live cells adjacent,
-     * the the grid need to extend one to the south.
-     *
-     * @return {@code true} if need extend to the south; otherwise {@code false}
-     */
-    private boolean shouldExtendSouth() {
-        byte count = 0;
-        for (int i = horizontalLeft; i <= horizontalRight; i++) {
-            Point p = new Point(verticalBottom, i);
-            if (currentGeneration.get(p) != null) {
-                count++;
-                if (count == 3) {
-                    return true;
-                }
-            } else {
-                count = 0;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Check if the current grid need to extend outward to west or not.
-     * <p>If on the west border of the grid have 3 or more live cells adjacent,
-     * the the grid need to extend one to the north.
-     *
-     * @return {@code true} if need extend to the west; otherwise {@code false}
-     */
-    private boolean shouldExtendWest() {
-        byte count = 0;
-        for (int i = verticalTop; i <= verticalBottom; i++) {
-            Point p = new Point(i, horizontalLeft);
-            if (currentGeneration.get(p) != null) {
-                count++;
-                if (count == 3) {
-                    return true;
-                }
-
-            } else {
-                count = 0;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Check if the current grid need to extend outward to east or not.
-     * <p>If on the east border of the grid have 3 or more live cells adjacent,
-     * the the grid need to extend one to the north.
-     *
-     * @return {@code true} if need extend to the east; otherwise {@code false}
-     */
-    private boolean shouldExtendEast() {
-        byte count = 0;
-        for (int i = verticalTop; i <= verticalBottom; i++) {
-            Point p = new Point(i, horizontalRight);
-            if (currentGeneration.get(p) != null) {
-                count++;
-                if (count == 3) {
-                    return true;
-                }
-
-            } else {
-                count = 0;
-            }
-        }
-        return false;
     }
 
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
 
-        for (int i = verticalTop; i <= verticalBottom; i++) {
-            for (int j = horizontalLeft; j <= horizontalRight; j++) {
+        for (int i = 0; i < 10; i++) {
+            for (int j = 0; j < 10; j++) {
                 Point p = new Point(i, j);
                 if (currentGeneration.get(p) != null) {
                     // Present the live cell by black square character
