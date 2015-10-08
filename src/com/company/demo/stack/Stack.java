@@ -16,11 +16,6 @@ public class Stack<T extends Comparable<T>> {
     protected Object[] data;
 
     /**
-     * Store the maximum value of the stack
-     */
-    protected Object maxVal;
-
-    /**
      * The current number of element in the stack
      */
     protected int size;
@@ -57,11 +52,6 @@ public class Stack<T extends Comparable<T>> {
         }
         data[size] = item;
         size++;
-
-        // Update the maximum value when pushing new value to the stack
-        if (maxVal == null || item.compareTo((T)maxVal) > 0) {
-            maxVal = item;
-        }
     }
 
     /**
@@ -74,21 +64,10 @@ public class Stack<T extends Comparable<T>> {
         if (size == 0) {
             return null;
         }
+
         T item = (T)data[size - 1];
         data[size - 1] = null;
         size--;
-
-        // Update the maximum value of the stack after remove an item
-        if (size == 0) {
-            maxVal = null;
-        } else if (item.equals(maxVal)) {
-            maxVal = data[0];
-            for (int i = 1; i < size; i++) {
-                if (((T)data[i]).compareTo((T)maxVal) > 0) {
-                    maxVal = data[i];
-                }
-            }
-        }
         return item;
     }
 
@@ -98,7 +77,18 @@ public class Stack<T extends Comparable<T>> {
      * @return The maximum value of the stack, return {@code null} value if empty stack.
      */
     public T getMax() {
-        return (T)maxVal;
+        T maxVal;
+        if (size == 0) {
+            maxVal = null;
+        } else {
+            maxVal = (T)data[0];
+            for (int i = 1; i < size; i++) {
+                if (((T)data[i]).compareTo(maxVal) > 0) {
+                    maxVal = (T)data[i];
+                }
+            }
+        }
+        return maxVal;
     }
 
     /**
