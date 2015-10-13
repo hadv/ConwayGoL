@@ -4,9 +4,9 @@ public class Node<T extends Comparable<T>> {
 
     private T item;
 
-    private T max;
+    private int max;
 
-    public Node(T item, T max) {
+    public Node(T item, int max) {
         this.item = item;
         this.max = max;
     }
@@ -15,7 +15,7 @@ public class Node<T extends Comparable<T>> {
         return item;
     }
 
-    public T getMax() {
+    public int getMax() {
         return max;
     }
 }

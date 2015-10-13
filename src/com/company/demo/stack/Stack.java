@@ -51,11 +51,11 @@ public class Stack<T extends Comparable<T>> {
             growCapacity();
         }
         if (size == 0) {
-            data[size] = new Node<T>(item, item);
+            data[size] = new Node<T>(item, 0);
         } else {
-            T max = data[size - 1].getMax();
-            if (item.compareTo(max) > 0) {
-                max = item;
+            int max = data[size - 1].getMax();
+            if (item.compareTo(data[max].getItem()) > 0) {
+                max = size;
             }
             data[size] = new Node<T>(item, max);
         }
@@ -88,7 +88,7 @@ public class Stack<T extends Comparable<T>> {
         if (size == 0) {
             return null;
         } else {
-            return data[size - 1].getMax();
+            return data[data[size - 1].getMax()].getItem();
         }
     }
 
