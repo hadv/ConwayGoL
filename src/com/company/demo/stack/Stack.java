@@ -13,7 +13,7 @@ public class Stack<T extends Comparable<T>> {
     /**
      * Array to contain the element of the stack
      */
-    protected Object[] data;
+    protected Node<T>[] data;
 
     /**
      * The current number of element in the stack
@@ -32,7 +32,7 @@ public class Stack<T extends Comparable<T>> {
     public Stack() {
         size = 0;
         capacity = 10;
-        data = new Object[capacity];
+        data = new Node[capacity];
     }
 
     /**
@@ -50,7 +50,15 @@ public class Stack<T extends Comparable<T>> {
         if ((size + 1) > capacity) {
             growCapacity();
         }
-        data[size] = item;
+        if (size == 0) {
+            data[size] = new Node<T>(item, item);
+        } else {
+            T max = data[size - 1].getMax();
+            if (item.compareTo(max) > 0) {
+                max = item;
+            }
+            data[size] = new Node<T>(item, max);
+        }
         size++;
     }
 
@@ -65,7 +73,7 @@ public class Stack<T extends Comparable<T>> {
             return null;
         }
 
-        T item = (T)data[size - 1];
+        T item = data[size - 1].getItem();
         data[size - 1] = null;
         size--;
         return item;
@@ -77,18 +85,11 @@ public class Stack<T extends Comparable<T>> {
      * @return The maximum value of the stack, return {@code null} value if empty stack.
      */
     public T getMax() {
-        T maxVal;
         if (size == 0) {
-            maxVal = null;
+            return null;
         } else {
-            maxVal = (T)data[0];
-            for (int i = 1; i < size; i++) {
-                if (((T)data[i]).compareTo(maxVal) > 0) {
-                    maxVal = (T)data[i];
-                }
-            }
+            return data[size - 1].getMax();
         }
-        return maxVal;
     }
 
     /**
