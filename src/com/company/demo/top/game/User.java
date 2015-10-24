@@ -2,7 +2,7 @@ package com.company.demo.top.game;
 
 import java.util.Comparator;
 
-public class User {
+public class User implements Comparable {
 
     private String userName;
     private int point;
@@ -18,6 +18,12 @@ public class User {
 
     public String getUserName() {
         return userName;
+    }
+
+    @Override
+    public int compareTo(Object o) {
+        User other = (User)o;
+        return Integer.compare(other.getPoint(), this.getPoint());
     }
 }
 

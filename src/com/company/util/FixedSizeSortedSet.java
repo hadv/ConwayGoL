@@ -1,4 +1,4 @@
-package com.company.demo.top.game;
+package com.company.util;
 
 import java.util.Comparator;
 import java.util.TreeSet;
@@ -49,9 +49,9 @@ public class FixedSizeSortedSet<E> extends TreeSet<E> {
      * <tt>(e==null&nbsp;?&nbsp;e2==null&nbsp;:&nbsp;e.equals(e2))</tt>.
      * If this set already contains the element, the call leaves the set
      * unchanged and returns {@code false}.
-     * If this set already contains full size, then check if the {@code e} less than
+     * If this set already contains full size, {@code MAX_SIZE}, then check if the {@code e} less than
      * the lowest element of the set, return {@code false}.
-     * If the {@code e} greater than the lowest elmenent of the set then remove the lowest element
+     * If the {@code e} greater than the lowest eleent of the set then remove the lowest element
      * and add the new element {@code e} into the set.
      *
      * @param e element to be added to this set
