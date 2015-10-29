@@ -31,9 +31,8 @@ public class FreeGameOfLifeDemo {
      * Running Game Of Life demo with some seed pattern.
      *
      * @param args input arguments for the program
-     * @throws InterruptedException
      */
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) {
         // Glider
         final byte gliderSeed[][] = {
                 {0, 0, 0, 0, 0, 0},
@@ -56,7 +55,11 @@ public class FreeGameOfLifeDemo {
             life.nextGeneration();
 
             // Do nothing but delay program some seconds to see the result of each step time.
-            Thread.sleep(1000);
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 }

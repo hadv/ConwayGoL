@@ -31,9 +31,8 @@ public class Main {
      * Running Game Of Life demo with some seed pattern.
      *
      * @param args input arguments for the program
-     * @throws InterruptedException
      */
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) {
         // Beacon (period 2)
         final byte beaconSeed[][] = {
                 {0, 0, 0, 0, 0, 0},
@@ -55,7 +54,11 @@ public class Main {
             life.nextGeneration();
 
             // Do nothing but delay program some seconds to see the result of each step time.
-            Thread.sleep(1000);
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 }
