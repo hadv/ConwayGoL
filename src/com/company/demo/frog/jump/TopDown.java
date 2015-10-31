@@ -20,7 +20,7 @@ public class TopDown {
      * @param n the total steps of stair
      * @param a the array to store the calculated step, the default value <i>zero</i> is mean still not calculated.
      * @return the total number of way that a frog can jump up to the <tt>n</tt> steps stair.
-     * If <tt>n < 0</tt>, then return 0.
+     * If <tt>n</tt> is less than 0, then return 0.
      */
     static long jump(int n, long a[]) {
         if (n < 0) return 0;
@@ -34,6 +34,4 @@ public class TopDown {
             return a[n];
         }
     }
-
-
 }
