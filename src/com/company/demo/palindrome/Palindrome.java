@@ -1,5 +1,7 @@
 package com.company.demo.palindrome;
 
+import com.sun.deploy.util.StringUtils;
+
 /**
  * A demo program to check a given string is <em>palindrome</em> or not.
  *
@@ -7,7 +9,12 @@ package com.company.demo.palindrome;
  */
 public class Palindrome {
 
-    public static void main(String[] args) {
+    /**
+     * The endpoint for the program
+     * @param args input parameters of the program.
+     * @throws IllegalAccessException
+     */
+    public static void main(String[] args) throws IllegalAccessException {
         System.out.println(": " + palindrome("RACE CAR"));
         System.out.println(": " + palindrome("Was it a car or a cat I saw"));
         System.out.println(": " + palindrome("Never odd or even"));
@@ -26,20 +33,15 @@ public class Palindrome {
      *
      * @param s the given string to check if it's a <em>palindrome</em> or not.
      * @return {@code true} if the given string is <em>palindrome</em>; otherwise return {@code false}.
+     * @exception IllegalArgumentException if the given input string is {@code null}.
      */
-    public static boolean palindrome(String s) {
+    public static boolean palindrome(String s) throws IllegalAccessException {
+        if (s == null) throw new IllegalAccessException();
         System.out.print("\"" + s + "\"");
-        s = s.replaceAll("[^a-zA-Z0-9]", "").toLowerCase();
+        s = s.replaceAll("[^a-zA-Z0-9]", "");
+        StringBuffer buffer = new StringBuffer(s);
 
-        int len = s.length();
-
-        int mid = len/2;
-
-        for (int i = 0; i < mid; i++) {
-            if (s.charAt(i) != s.charAt(len - i - 1)) {
-                return false;
-            }
-        }
-        return true;
+        if (s.equalsIgnoreCase(buffer.reverse().toString())) return true;
+        return false;
     }
 }
