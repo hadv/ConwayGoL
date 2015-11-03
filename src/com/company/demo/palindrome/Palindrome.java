@@ -1,7 +1,5 @@
 package com.company.demo.palindrome;
 
-import com.sun.deploy.util.StringUtils;
-
 /**
  * A demo program to check a given string is <em>palindrome</em> or not.
  *
@@ -12,9 +10,9 @@ public class Palindrome {
     /**
      * The endpoint for the program
      * @param args input parameters of the program.
-     * @throws IllegalAccessException
+     * @throws IllegalArgumentException
      */
-    public static void main(String[] args) throws IllegalAccessException {
+    public static void main(String[] args) throws IllegalArgumentException {
         System.out.println(": " + palindrome("RACE CAR"));
         System.out.println(": " + palindrome("Was it a car or a cat I saw"));
         System.out.println(": " + palindrome("Never odd or even"));
@@ -35,8 +33,8 @@ public class Palindrome {
      * @return {@code true} if the given string is <em>palindrome</em>; otherwise return {@code false}.
      * @exception IllegalArgumentException if the given input string is {@code null}.
      */
-    public static boolean palindrome(String s) throws IllegalAccessException {
-        if (s == null) throw new IllegalAccessException();
+    public static boolean palindrome(String s) throws IllegalArgumentException {
+        if (s == null) throw new IllegalArgumentException();
         System.out.print("\"" + s + "\"");
         s = s.replaceAll("[^a-zA-Z0-9]", "");
         StringBuffer buffer = new StringBuffer(s);
