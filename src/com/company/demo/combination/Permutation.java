@@ -38,7 +38,6 @@ public class Permutation {
         int len = s.length();
         for (int i = 1; i <= len; i++) {
             StringPermutation sp = new StringPermutation(i, s);
-            sp.combination(0);
             output.addAll(sp.getOutputList());
         }
         return output;
@@ -53,7 +52,6 @@ public class Permutation {
     public static List<String> f2(String s) {
         int len = s.length();
         StringPermutation sp = new StringPermutation(len, s);
-        sp.combination(0);
         return sp.getOutputList();
     }
 }
@@ -108,7 +106,7 @@ class StringPermutation {
      *
      * @param i the i-th item in the k-length
      */
-    public void combination(int i) {
+     private void combination(int i) {
         int len = input.length;
         for (int j = 0; j < len; j++) {
             if (!used[j]) {
@@ -130,6 +128,7 @@ class StringPermutation {
      * @return the output result of k-length permutation string.
      */
     public List<String> getOutputList() {
+        combination(0);
         return outputList;
     }
 }
