@@ -1,6 +1,7 @@
 package com.company.demo.combination;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -15,13 +16,13 @@ public class Permutation {
      */
     public static void main(String[] args) {
         System.out.println("----------- f1 ------------");
-        List<String> output = f1("abc");
+        List<String> output = f1("3412");
         for (String s: output) {
             System.out.println(s);
         }
 
         System.out.println("----------- f2 ------------");
-        output = f2("abc");
+        output = f2("123");
         for (String s: output) {
             System.out.println(s);
         }
@@ -71,6 +72,9 @@ class StringPermutation {
     // The current permutation output from the input string
     private char[] output;
 
+    // The current permutation output from the input string
+    private char[] current;
+
     // Output k-length
     private int k;
 
@@ -79,7 +83,7 @@ class StringPermutation {
 
     /**
      * Construct to create an instance of {@code StringPermutation} class
-     * to calculate all the k-length permuration of given input string {@code str}
+     * to calculate all the k-length permuation of given input string {@code str}
      *
      * @param k the input length of the permutation
      * @param str the given input string
@@ -96,8 +100,13 @@ class StringPermutation {
             used[i] = false;
         }
 
+        Arrays.sort(input);
         this.k = k;
         output = new char[k];
+        current = new char[k];
+        for (int i = 0; i < k; i++) {
+            current[i] = input[i];
+        }
         outputList = new ArrayList<String>();
     }
 
@@ -123,6 +132,14 @@ class StringPermutation {
     }
 
     /**
+     *
+     * @return
+     */
+    private String next() {
+        return toString();
+    }
+
+    /**
      * Return the list of k-length permutation of input string.
      *
      * @return the output result of k-length permutation string.
@@ -130,5 +147,13 @@ class StringPermutation {
     public List<String> getOutputList() {
         combination(0);
         return outputList;
+    }
+
+    /**
+     *
+     * @return
+     */
+    public String toString() {
+        return new String(current);
     }
 }
