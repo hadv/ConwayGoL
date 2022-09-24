@@ -36,11 +36,21 @@ public class ConwayGOL {
     public static void main(String[] args) {
         // Glider
         final byte gliderSeed[][] = {
-                {0, 0, 0, 0, 0, 0},
-                {0, 0, 0, 1, 0, 0},
-                {0, 1, 0, 1, 0, 0},
-                {0, 0, 1, 1, 0, 0},
-                {0, 0, 0, 0, 0, 0}
+                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0 ,0 ,0 ,0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0, 1 ,1 ,1 ,1, 0, 0, 0, 0},
+                {0, 0, 0, 1, 1, 0, 1, 0 ,0 ,0 ,0, 1, 0, 0, 0},
+                {0, 0, 1, 0, 0, 0, 1, 0 ,0 ,0 ,0, 1, 0, 0, 0},
+                {0, 0, 1, 0, 0, 0, 0, 1 ,1 ,0 ,0, 0, 0, 0, 0},
+                {0, 0, 1, 0, 0, 1, 0, 0 ,0 ,0 ,1, 1, 0, 0, 0},
+                {0, 0, 1, 0, 0, 1, 0, 0 ,0 ,1 ,0, 0, 1, 0, 0},
+                {0, 0, 0, 1, 1, 0, 0, 0 ,0 ,1 ,0, 0, 1, 0, 0},
+                {0, 0, 0, 0, 0, 0, 1, 1 ,0 ,0 ,0, 0, 1, 0, 0},
+                {0, 0, 0, 1, 0, 0, 0, 0 ,1 ,0 ,0, 0, 1, 0, 0},
+                {0, 0, 0, 1, 0, 0, 0, 0 ,1 ,0 ,1, 1, 0, 0, 0},
+                {0, 0, 0, 0, 1, 1, 1, 1 ,0 ,0 ,0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0 ,0 ,0 ,0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0 ,0 ,0 ,0, 0, 0, 0, 0}
         };
 
         // Initialize the Game Of Life with a given seed
@@ -55,7 +65,7 @@ public class ConwayGOL {
 
             // Do nothing but delay program some seconds to see the result of each step time.
             try {
-                Thread.sleep(1000);
+                Thread.sleep(100);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -174,8 +184,8 @@ class ConwayGameOfLife {
     public String toString() {
         StringBuilder builder = new StringBuilder();
 
-        for (int i = 0; i < 10; i++) {
-            for (int j = 0; j < 10; j++) {
+        for (int i = 0; i < 15; i++) {
+            for (int j = 0; j < 15; j++) {
                 Point p = new Point(i, j);
                 if (currentGeneration.get(p) != null) {
                     // Present the live cell by black square character
