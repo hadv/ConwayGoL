@@ -100,6 +100,10 @@ class ConwayGameOfLife {
             { 1,  1}  // SE
     };
 
+    private int horizontal;
+
+    private int vertical;
+
     /**
      * Initialize the current state of the system with a given seed.
      *
@@ -175,9 +179,19 @@ class ConwayGameOfLife {
      * @param seed seed of the system
      */
     private void initSystemState(final byte[][] seed) {
+        vertical = seed.length;
+        if (vertical < 1) {
+            throw new IllegalArgumentException();
+        }
+
+        horizontal = seed[0].length;
+        if (horizontal < 1) {
+            throw new IllegalArgumentException();
+        }
+
         currentGeneration = new HashMap<Point, Byte>();
-        for (int i = 0; i < seed.length; i++) {
-            for (int j = 0; j < seed[i].length; j++) {
+        for (int i = 0; i < vertical; i++) {
+            for (int j = 0; j < horizontal; j++) {
                 if (seed[i][j] == 1) {
                     currentGeneration.put(new Point(i, j), LIVE_CELL_VAL);
                 }
@@ -189,8 +203,8 @@ class ConwayGameOfLife {
     public String toString() {
         StringBuilder builder = new StringBuilder();
 
-        for (int i = 0; i < 20; i++) {
-            for (int j = 0; j < 38; j++) {
+        for (int i = 0; i < vertical; i++) {
+            for (int j = 0; j < horizontal; j++) {
                 Point p = new Point(i, j);
                 if (currentGeneration.get(p) != null) {
                     // Present the live cell by black square character
